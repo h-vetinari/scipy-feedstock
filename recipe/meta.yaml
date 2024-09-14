@@ -18,6 +18,8 @@ build:
   skip: true  # [py<310]
   # pypy is currently broken and on its way out anyway
   skip: true  # [python_impl == "pypy"]
+  # debug
+  skip: true  # [build_platform != target_platform]
 
 requirements:
   build:
