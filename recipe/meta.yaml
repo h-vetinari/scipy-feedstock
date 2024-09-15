@@ -20,6 +20,8 @@ build:
   skip: true  # [python_impl == "pypy"]
   # debug
   skip: true  # [build_platform != target_platform]
+  # debug
+  skip: true  # [not win]
 
 requirements:
   build:
