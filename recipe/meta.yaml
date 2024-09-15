@@ -10,8 +10,8 @@ package:
   version: {{ version }}
 
 source:
-  - git_url: https://github.com/ilayn/scipy.git
-    git_rev: expm_C
+  - git_url: https://github.com/scipy/scipy.git
+    git_rev: main
 
 build:
   number: 0
