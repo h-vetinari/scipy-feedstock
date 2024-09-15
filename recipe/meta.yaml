@@ -12,6 +12,9 @@ package:
 source:
   - git_url: https://github.com/scipy/scipy.git
     git_rev: 485b26da6b797b5b98d9441ae304388ea1dceb66
+    patches:
+      # backport https://github.com/scipy/scipy/pull/21069
+      - patches/0001-MAINT-fix-typo-in-small_dynamic_array.h-21069.patch
 
 build:
   number: 0
