@@ -10,8 +10,8 @@ package:
   version: {{ version }}
 
 source:
-  - git_url: https://github.com/scipy/scipy.git
-    git_rev: 1eff03d65543311c392c9f137ed490fd3c322c00
+  - git_url: https://github.com/ilayn/scipy.git
+    git_rev: expm_C
     patches:
       # revert https://github.com/scipy/scipy/commit/cf664690e47bb0fed5ee1552353de42797a30b12
       - patches/0001-Revert-MAINT-io-move-_test_fortran-under-tests.patch
