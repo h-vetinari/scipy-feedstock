@@ -11,7 +11,7 @@ package:
 
 source:
   - git_url: https://github.com/scipy/scipy.git
-    git_rev: 77060bc96ba19098cf0459fd495065b125e2fb7b
+    git_rev: 0b7ab46f777e1086599a3b6e4029304bb6973860
 
 build:
   number: 0
