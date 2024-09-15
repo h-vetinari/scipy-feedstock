@@ -104,6 +104,48 @@ outputs:
       requires:
         - pytest
         - hypothesis
+      imports:
+        - scipy
+        # reference for public API is effectively
+        # https://github.com/scipy/scipy/blob/main/scipy/_lib/tests/test_public_api.py
+        - scipy.cluster
+        - scipy.cluster.hierarchy
+        - scipy.cluster.vq
+        - scipy.constants
+        - scipy.datasets
+        - scipy.fft
+        - scipy.fftpack
+        - scipy.integrate
+        - scipy.interpolate
+        - scipy.io
+        - scipy.io.arff
+        - scipy.io.matlab
+        - scipy.io.wavfile
+        - scipy.linalg
+        - scipy.linalg.blas
+        - scipy.linalg.cython_blas
+        - scipy.linalg.cython_lapack
+        - scipy.linalg.interpolative
+        - scipy.linalg.lapack
+        - scipy.misc
+        - scipy.ndimage
+        - scipy.odr
+        - scipy.optimize
+        - scipy.signal
+        - scipy.signal.windows
+        - scipy.sparse
+        - scipy.sparse.csgraph
+        - scipy.sparse.linalg
+        - scipy.spatial
+        - scipy.spatial.distance
+        - scipy.spatial.transform
+        - scipy.special
+        - scipy.stats
+        - scipy.stats.contingency
+        - scipy.stats.distributions
+        - scipy.stats.mstats
+        - scipy.stats.qmc
+        - scipy.stats.sampling
       commands:
         # absence of tests (selection)
         {% set test_folders = [
@@ -131,6 +173,16 @@ outputs:
         - test ! -f $SP_DIR/scipy/{{ each_lib }}.{{ PY_ABI }}-darwin.so                                   # [osx]
         - if exist %SP_DIR%\scipy\{{ "\\".join(each_lib.split("/")) }}.{{ PY_ABI }}-win_amd64.pyd exit 1  # [win]
         {% endfor %}
+
+        # test that scipy.test raises an informative error
+        - python -c "import scipy; throw_away_the_return_value = scipy.test()" > testlog
+        - python -c "import sys; lines=open('testlog').readlines(); sys.exit(0 if any('conda-forge builds of' in x for x in lines) else 1)"
+        # same for `pytest --pyargs scipy` (uses exit code that's neither 0 or 1 on win, which breaks piping)
+        - (pytest --pyargs scipy || echo "failure was expected") > testlog   # [unix]
+        - (pytest --pyargs scipy || if !ERRORLEVEL! neq 0 exit 0) > testlog  # [win]
+        - python -c "import sys; lines=open('testlog').readlines(); sys.exit(0 if any('conda-forge builds of' in x for x in lines) else 1)"
+        # ensure only one test is left (namely, our hint)
+        - python -c "import sys; lines=open('testlog').readlines(); sys.exit(0 if any('======== 1 failed' in x for x in lines) else 1)"
 
   - name: scipy-tests
     script: build-output.sh   # [not win]
