@@ -43,6 +43,8 @@ requirements:
     - liblapack
     - python
     - cython
+    # for https://github.com/scipy/scipy/issues/25904
+    - meson <1.12
     - meson-python
     - ninja
     - pkg-config
@@ -76,6 +78,8 @@ outputs:
         - liblapack
         - python
         - cython
+        # for https://github.com/scipy/scipy/issues/25904
+        - meson <1.12
         - meson-python
         - ninja
         - pkg-config
@@ -191,6 +195,8 @@ outputs:
         - cython                                 # [build_platform != target_platform]
         - numpy                                  # [build_platform != target_platform]
         - pybind11                               # [build_platform != target_platform]
+        # for https://github.com/scipy/scipy/issues/25904
+        - meson <1.12                            # [build_platform != target_platform]
         - meson-python                           # [build_platform != target_platform]
         - cmake                                  # [build_platform != target_platform]
         - ninja                                  # [build_platform != target_platform]
