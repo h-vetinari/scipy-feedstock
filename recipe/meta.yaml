@@ -1,8 +1,8 @@
-{% set version = "1.18.0" %}
+{% set version = "1.18.1" %}
 
 # Update the numpy value here to the most recent released version
 # when updating to a new scipy feature release; override default pins
-{% set numpy = "2.4" %}
+{% set numpy = "2.5" %}
 {% set numpy_minor = numpy.split(".")[1] | int %}
 
 # ensure is_freethreading gets detected as a used variable
@@ -13,8 +13,14 @@ package:
   version: {{ version }}
 
 source:
-  url: https://pypi.org/packages/source/s/scipy/scipy-{{ version }}.tar.gz
-  sha256: 67b2ad2ad54c72ca6d04975a9b2df8c3638c34ddd5b28738e94fc2b57929d378
+  url: https://files.pythonhosted.org/packages/source/s/scipy/scipy-{{ version }}.tar.gz
+  sha256: 52c4b7422442aba924d03ad4019852b08a92e64ea187b933135687bfe2747307
+  patches:
+    # backport https://github.com/scipy/scipy/pull/25571
+    - patches/0001-TST-loosen-signal-test-tolerances-for-FMA-contractio.patch
+    # backport https://github.com/scipy/scipy/pull/25632
+    - patches/0002-TST-sparse.linalg-skip-tfqmr-rand-sym-pd-F-on-all-pl.patch
+    - patches/0003-preserve-sici-signed-zero.patch
 
 build:
   number: 0
@@ -43,6 +49,8 @@ requirements:
     - liblapack
     - python
     - cython
+    # for https://github.com/scipy/scipy/issues/25904
+    - meson <1.12
     - meson-python
     - ninja
     - pkg-config
@@ -76,6 +84,8 @@ outputs:
         - liblapack
         - python
         - cython
+        # for https://github.com/scipy/scipy/issues/25904
+        - meson <1.12
         - meson-python
         - ninja
         - pkg-config
@@ -160,12 +170,13 @@ outputs:
             "ndimage/_ctest", "ndimage/_cytest", "special/_test_internal"
         ] %}
         {% set PY_ABI = "cpython-" ~ PY_VER.replace(".", "") %}                         # [unix]
-        {% set PY_ABI = "cp" ~ PY_VER.replace(".", "") %}                               # [win]
+        {% set PY_ABI = "cp" ~ PY_VER.replace(".", "") ~ ("t" if is_freethreading == "true" else "") %}   # [win]
         {% set ARCH = "x86_64" if x86 else ("aarch64" if aarch64 else "powerpc64le")%}  # [linux]
+        {% set ARCH = "amd64" if x86 else "arm64" %}                                    # [win]
         {% for each_lib in test_libraries %}
         - test ! -f $SP_DIR/scipy/{{ each_lib }}.{{ PY_ABI }}-{{ ARCH }}-linux-gnu.so                     # [linux]
         - test ! -f $SP_DIR/scipy/{{ each_lib }}.{{ PY_ABI }}-darwin.so                                   # [osx]
-        - if exist %SP_DIR%\scipy\{{ "\\".join(each_lib.split("/")) }}.{{ PY_ABI }}-win_amd64.pyd exit 1  # [win]
+        - if exist %SP_DIR%\scipy\{{ "\\".join(each_lib.split("/")) }}.{{ PY_ABI }}-win_{{ ARCH }}.pyd exit 1  # [win]
         {% endfor %}
 
         # test that scipy.test raises an informative error
@@ -191,6 +202,8 @@ outputs:
         - cython                                 # [build_platform != target_platform]
         - numpy                                  # [build_platform != target_platform]
         - pybind11                               # [build_platform != target_platform]
+        # for https://github.com/scipy/scipy/issues/25904
+        - meson <1.12                            # [build_platform != target_platform]
         - meson-python                           # [build_platform != target_platform]
         - cmake                                  # [build_platform != target_platform]
         - ninja                                  # [build_platform != target_platform]
@@ -233,6 +246,9 @@ outputs:
         {% set tests_to_skip = "_not_a_real_test" %}
         # sign errors
         {% set tests_to_skip = tests_to_skip + " or (TestSystematic and test_spherical)" %}               # [aarch64]
+        # Single-precision CGS convergence depends on platform rounding;
+        # similar to https://github.com/scipy/scipy/issues/25522
+        {% set tests_to_skip = tests_to_skip + " or (test_convergence and rand-sym-pd-F-cgs)" %}          # [win and arm64]
         # on the slowest agents, these tests take more than 20min in emulation
         {% set tests_to_skip = tests_to_skip + " or test_all_nograd_minimizers" %}                        # [build_platform != target_platform]
         {% set tests_to_skip = tests_to_skip + " or test_mixed_threads_processes or test_sf_gh18506" %}   # [build_platform != target_platform]
