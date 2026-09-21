@@ -23,7 +23,7 @@ source:
     - patches/0003-preserve-sici-signed-zero.patch
 
 build:
-  number: 0
+  number: 1
   skip: true  # [py<312]
 
 requirements:
@@ -161,7 +161,9 @@ outputs:
         ] %}
         {% for each_folder in test_folders %}
         - test ! -d $SP_DIR/scipy/{{ each_folder }}                               # [unix]
-        - if exist %SP_DIR%\scipy\{{ "\\".join(each_folder.split("/")) }} exit 1  # [win]
+        - if exist %SP_DIR%\scipy\{{ "\\".join(each_folder.split("/")) }} exit 1  # [win and py<315]
+        # go back to SP_DIR once https://github.com/conda/conda-build/pull/6143 is available
+        - if exist %PREFIX%\lib\python\site-packages\scipy\{{ "\\".join(each_folder.split("/")) }} exit 1  # [win and py>=315]
         {% endfor %}
 
         # absence of testing DSOs (selection)
@@ -176,7 +178,8 @@ outputs:
         {% for each_lib in test_libraries %}
         - test ! -f $SP_DIR/scipy/{{ each_lib }}.{{ PY_ABI }}-{{ ARCH }}-linux-gnu.so                     # [linux]
         - test ! -f $SP_DIR/scipy/{{ each_lib }}.{{ PY_ABI }}-darwin.so                                   # [osx]
-        - if exist %SP_DIR%\scipy\{{ "\\".join(each_lib.split("/")) }}.{{ PY_ABI }}-win_{{ ARCH }}.pyd exit 1  # [win]
+        - if exist %SP_DIR%\scipy\{{ "\\".join(each_lib.split("/")) }}.{{ PY_ABI }}-win_{{ ARCH }}.pyd exit 1  # [win and py<315]
+        - if exist %PREFIX%\lib\python\site-packages\scipy\{{ "\\".join(each_lib.split("/")) }}.{{ PY_ABI }}-win_{{ ARCH }}.pyd exit 1  # [win and py>=315]
         {% endfor %}
 
         # test that scipy.test raises an informative error
