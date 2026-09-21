@@ -23,7 +23,7 @@ source:
     - patches/0003-preserve-sici-signed-zero.patch
 
 build:
-  number: 0
+  number: 1
   skip: true  # [py<312]
 
 requirements:
