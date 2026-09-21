@@ -11,7 +11,13 @@ if "%PKG_NAME%"=="scipy" (
     )
 
     REM copy "test" with informative error message into installation
-    copy %RECIPE_DIR%\test_conda_forge_packaging.py %SP_DIR%\scipy\_lib
+    if "%PY_VER%"=="3.15" (
+        REM new site-packages location as of 3.15, SP_DIR doesn't
+        REM work until https://github.com/conda/conda-build/pull/6143
+        copy %RECIPE_DIR%\test_conda_forge_packaging.py %PREFIX%\lib\python\site-packages\scipy\_lib
+    ) else (
+        copy %RECIPE_DIR%\test_conda_forge_packaging.py %SP_DIR%\scipy\_lib
+    )
 
     REM clean up dist folder for building tests
     rmdir /s /q dist
