@@ -16,10 +16,13 @@ FOR %%A IN ("%~dp0.") DO SET "REPO_ROOT=%%~dpA"
 if "%MINIFORGE_HOME%"=="" set "MINIFORGE_HOME=%USERPROFILE%\Miniforge3"
 :: Remove trailing backslash, if present
 if "%MINIFORGE_HOME:~-1%"=="\" set "MINIFORGE_HOME=%MINIFORGE_HOME:~0,-1%"
+
+set "arch=64"
+if "%PROCESSOR_ARCHITECTURE%"=="ARM64" set "arch=arm64"
 call :start_group "Provisioning base env with micromamba"
 set "MAMBA_ROOT_PREFIX=%MINIFORGE_HOME%-micromamba-%RANDOM%"
-set "MICROMAMBA_VERSION=1.5.10-0"
-set "MICROMAMBA_URL=https://github.com/mamba-org/micromamba-releases/releases/download/%MICROMAMBA_VERSION%/micromamba-win-64"
+set "MICROMAMBA_VERSION=2.9.0-0"
+set "MICROMAMBA_URL=https://github.com/mamba-org/micromamba-releases/releases/download/%MICROMAMBA_VERSION%/micromamba-win-%arch%"
 set "MICROMAMBA_TMPDIR=%TMP%\micromamba-%RANDOM%"
 set "MICROMAMBA_EXE=%MICROMAMBA_TMPDIR%\micromamba.exe"
 
